@@ -10,7 +10,6 @@ const FormSignUp = () => {
       {/* Judul Form */}
       <div className="text-center mb-8">
         <h1 className="text-xl font-bold text-gray-900">Create an Account</h1>
-        <p className="text-gray-500 text-sm">Enter your details to sign up</p>
       </div>
 
       <form action="">
@@ -18,7 +17,7 @@ const FormSignUp = () => {
           <LabeledInput 
             label="Name"
             type="text"
-            placeholder="John Doe"
+            placeholder="ninuninu"
             name="name"
           />
         </div>
@@ -63,7 +62,6 @@ const FormSignUp = () => {
       {/* Link Login */}
       <div className="flex justify-center text-sm">
           <span className="text-gray-500 mr-1">Already have an account?</span>
-          {/* PERBAIKAN: Ganti 'link' jadi 'Link' */}
           <Link to="/login" className="text-primary font-bold cursor-pointer">Sign in here</Link>
       </div>
     </>

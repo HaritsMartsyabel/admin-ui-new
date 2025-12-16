@@ -16,5 +16,5 @@ function Error() {
   );
 }
 
-// Export juga harus Error
+
 export default Error;

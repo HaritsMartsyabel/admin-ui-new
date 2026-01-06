@@ -9,27 +9,35 @@ import CardExpenseBeakdown from '../components/Fragments/CardExpenseBeakdown';
 import { transactions, bills, expensesBreakdowns, balances, expensesStatistics } from '../data';
 import { goalService } from '../services/dataService';
 import { AuthContext } from '../context/authContext';
+import AppSnackbar from '../components/Elements/AppSnackbar';
 
-// PERBAIKAN 1: Nama komponen WAJIB Huruf Besar (React Rule)
 function Dashboard() {
   
-  // PERBAIKAN 2: Panggil 'logout' dari AuthContext agar tidak error saat token expired
   const { logout } = useContext(AuthContext);
 
-  // PERBAIKAN 3: Ganti useState({}) menjadi ada isinya.
-  // Ini WAJIB dilakukan agar grafik tidak error "NaN" (Layar Merah) saat loading.
-  const [goals, setGoals] = useState({ present_amount: 0, target_amount: 1 });
+  const [goals, setGoals] = useState({});
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
+  };
 
   const fetchGoals = async () => {
     try {
       const data = await goalService();
       setGoals(data);
     } catch (err) {
-      console.error("Gagal mengambil data goals:", err);
-      // PERBAIKAN 4: Penanganan error yang lebih aman
+      setSnackbar({
+        open: true,
+        message: "Gagal mengambil data goals",
+        severity: "error",
+      });
       if (err.status === 401) {
-        logout();
-      } else if (err.response && err.response.status === 401) {
         logout();
       }
     }
@@ -64,6 +72,13 @@ function Dashboard() {
             <CardExpenseBeakdown data={expensesBreakdowns} />
           </div>
         </div>
+
+        <AppSnackbar
+          open={snackbar.open}
+          message={snackbar.message}
+          severity={snackbar.severity}
+          onClose={handleCloseSnackbar}
+        />
       </MainLayout>
     </>
   )

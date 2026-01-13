@@ -3,7 +3,18 @@ import MainLayout from "../components/Layouts/MainLayout";
 import CardExpense from "../components/Fragments/CardExpense";
 import { expenseService } from "../services/dataService";
 import { ThemeContext } from "../context/themeContext";
-import LogoutBackdrop from "../components/Elements/LogoutBackdrop";
+
+const Loader = ({ color = "#299D91" }) => (
+  <div className="w-full flex flex-col items-center justify-center min-h-[520px]">
+    <div
+      className="h-10 w-10 rounded-full border-4 border-t-transparent animate-spin"
+      style={{ borderColor: color, borderTopColor: "transparent" }}
+    />
+    <p className="mt-4 text-sm font-medium" style={{ color }}>
+      Loading Data
+    </p>
+  </div>
+);
 
 const ExpensePage = () => {
   const { theme } = useContext(ThemeContext);
@@ -15,12 +26,9 @@ const ExpensePage = () => {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        setLoading(true);
         const data = await expenseService();
-        console.log("Expenses API:", data);
         setExpenses(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error(err);
         setError(err?.msg || "Gagal memuat data expenses");
       } finally {
         setLoading(false);
@@ -32,18 +40,14 @@ const ExpensePage = () => {
 
   return (
     <MainLayout>
-      <LogoutBackdrop
-        open={loading}
-        text="Loading Data"
-        color={theme?.color || "#299D91"}
-      />
-
       <div className="px-8 py-6">
         <h2 className="text-[18px] font-semibold text-gray-600 mb-4">
           Expenses Comparison
         </h2>
 
-        {error ? (
+        {loading ? (
+          <Loader color={theme?.color || "#299D91"} />
+        ) : error ? (
           <p className="text-red-500 text-sm">{error}</p>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

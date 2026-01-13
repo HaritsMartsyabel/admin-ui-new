@@ -48,7 +48,6 @@ function CardBalance(props) {
             ))}
           />
         }
-        // BAGIAN BAWAH INI SAYA BERSIHKAN DARI SISA KODE YANG BERLEBIH
       />
     </>
   );

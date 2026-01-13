@@ -1,12 +1,15 @@
-import React, {useContext,useState} from "react"; 
+import React, { useContext, useState } from "react";
 import Logo from "../Elements/Logo";
 import Input from "../Elements/Input";
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import Icon from "../Elements/Icon";
 import { NavLink } from "react-router-dom";
 import { ThemeContext } from "../../context/themeContext";
 import { AuthContext } from "../../context/authContext";
 import { logoutService } from "../../services/authService";
+
+// ✅ Backdrop Loader (Portal)
+import LogoutBackdrop from "../Elements/LogoutBackdrop";
 
 function MainLayout(props) {
   const { children } = props;
@@ -19,12 +22,12 @@ function MainLayout(props) {
     { name: "theme-brown", bgcolor: "bg-[#8B4513]", color: "#8B4513" },
   ];
 
-  const {theme, setTheme} = useContext(ThemeContext);
+  const { theme, setTheme } = useContext(ThemeContext);
 
   const menu = [
     { id: 1, name: "Overview", icon: <Icon.Overview />, link: "/" },
     { id: 2, name: "Balances", icon: <Icon.Balance />, link: "/balance" },
-    { id: 3, name: "Transaction", icon: <Icon.Transaction />, link: "/transaction", },
+    { id: 3, name: "Transaction", icon: <Icon.Transaction />, link: "/transaction" },
     { id: 4, name: "Bills", icon: <Icon.Bill />, link: "/bill" },
     { id: 5, name: "Expenses", icon: <Icon.Expense />, link: "/expense" },
     { id: 6, name: "Goals", icon: <Icon.Goal />, link: "/goal" },
@@ -32,28 +35,42 @@ function MainLayout(props) {
   ];
 
   const { user, logout } = useContext(AuthContext);
-  
-  	  const handleLogout = async () => {
+
+  // ✅ state loading logout
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const handleLogout = async () => {
     try {
+      setLogoutLoading(true); // ✅ show backdrop
       await logoutService();
-      logout(); 
+      logout();
     } catch (err) {
       console.error(err);
-      if (err.status === 401) {
+      if (err?.status === 401) {
         logout();
       }
+    } finally {
+      setLogoutLoading(false); // ✅ hide backdrop
     }
   };
-  
+
   return (
     <>
+      {/* ✅ Backdrop muncul di <body> lewat Portal, warna ikut theme */}
+      <LogoutBackdrop
+        open={logoutLoading}
+        text="Logging Out"
+        color={theme?.color || "#299D91"}
+      />
+
       <div className={`flex min-h-screen ${theme.name}`}>
-      <aside className="bg-defaultBlack w-28 sm:w-64 text-special-bg2 flex flex-col justify-between px-7 py-12">
-            <div>
-      <div className="mb-10">
-                <Logo variant="secondary" />
+        <aside className="bg-defaultBlack w-28 sm:w-64 text-special-bg2 flex flex-col justify-between px-7 py-12">
+          <div>
+            <div className="mb-10">
+              <Logo variant="secondary" />
             </div>
-      <nav>
+
+            <nav>
               {menu.map((item) => (
                 <NavLink
                   key={item.id}
@@ -65,14 +82,15 @@ function MainLayout(props) {
                         : "hover:bg-special-bg3"
                     }`
                   }
-                  >
+                >
                   <div className="mx-auto sm:mx-0">{item.icon}</div>
                   <div className="ms-3 hidden sm:block">{item.name}</div>
                 </NavLink>
               ))}
             </nav>
-    </div>
-              <div>
+          </div>
+
+          <div>
             Themes
             <div className="flex flex-col sm:flex-row gap-2 items-center">
               {themes.map((t) => (
@@ -84,49 +102,58 @@ function MainLayout(props) {
               ))}
             </div>
           </div>
-    <div>
-      <div onClick={handleLogout} className="cursor-pointer">
-          <div className="flex bg-special-bg3 text-white px-4 py-3 rounded-md">
+
+          <div>
+            <div
+              onClick={logoutLoading ? undefined : handleLogout}
+              className={`cursor-pointer ${
+                logoutLoading ? "opacity-60 pointer-events-none" : ""
+              }`}
+            >
+              <div className="flex bg-special-bg3 text-white px-4 py-3 rounded-md">
                 <div className="mx-auto sm:mx-0 text-primary">
-                    <Icon.Logout />
+                  <Icon.Logout />
                 </div>
                 <div className="ms-3 hidden sm:block">Logout</div>
               </div>
-              </div>
+            </div>
+
             <div className="border my-10 border-b-special-bg"></div>
-        <div className="flex justify-between items-center">
+
+            <div className="flex justify-between items-center">
               <div>Avatar</div>
               <div className="hidden sm:block">
-               <div>{user.name}</div> 
-               <div>View Profile</div>  
+                <div>{user?.name}</div>
+                <div>View Profile</div>
               </div>
               <div className="hidden sm:block">
                 <Icon.Detail size={15} />
               </div>
             </div>
-    </div>
-            </aside>
-      <div className="bg-special-mainBg flex-1 flex flex-col">
-            <header className="border border-b border-gray-05 px-6 py-7 flex justify-between items-center">
+          </div>
+        </aside>
+
+        <div className="bg-special-mainBg flex-1 flex flex-col">
+          <header className="border border-b border-gray-05 px-6 py-7 flex justify-between items-center">
             <div className="flex items-center">
-        <div className="font-bold text-2xl me-6">{user.name}</div> 
-      <div className="text-gray-03 flex">
+              <div className="font-bold text-2xl me-6">{user?.name}</div>
+              <div className="text-gray-03 flex">
                 <Icon.ChevronRight size={20} />
                 <span>May 19, 2023</span>
-                </div>
-        </div>
-        
-        <div className="flex items-center gap-4">
-             <div className="flex items-center">
-                <NotificationsIcon className="text-primary scale-110"/>
-             </div> 
-            <Input backgroundColor="bg-white" border="border-white" /> 
-        </div>
-
-            </header>
-      <main className="flex-1 px-6 py-4">{children}</main>
+              </div>
             </div>
-    </div>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center">
+                <NotificationsIcon className="text-primary scale-110" />
+              </div>
+              <Input backgroundColor="bg-white" border="border-white" />
+            </div>
+          </header>
+
+          <main className="flex-1 px-6 py-4">{children}</main>
+        </div>
+      </div>
     </>
   );
 }

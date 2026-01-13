@@ -6,7 +6,7 @@ export const loginService = async (email, password) => {
   try {
     const response = await axios.post(
       `${API_URL}/login`,
-      { email, password }, 
+      { email, password },
     );
 
     return response.data;
@@ -19,18 +19,32 @@ export const logoutService = async () => {
   try {
     const token = localStorage.getItem("token");
 
-    await axios.post(`${API_URL}/logout`, 
-     {},
-	   {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      }, 
-     }
+    await axios.post(
+      `${API_URL}/logout`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
     );
   } catch (error) {
     throw {
       status: error.response?.status,
       msg: error.response?.data?.msg,
     };
+  }
+};
+
+export const registerService = async (name, email, password) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/register`,
+      { name, email, password }
+    );
+
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { msg: "Register gagal" };
   }
 };
